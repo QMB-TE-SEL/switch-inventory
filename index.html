@@ -457,7 +457,7 @@
   <div v-if="showExportModal" class="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center px-4">
     <div class="bg-white rounded-xl shadow-xl p-6 w-full max-w-xs">
       <h3 class="text-sm font-semibold text-slate-800 mb-2">Export Excel</h3>
-      <p class="text-xs text-slate-500 mb-4">ไฟล์มี 3 sheet: <br/>All / F7 / F10</p>
+      <p class="text-xs text-slate-500 mb-4">จะ export เฉพาะ <b class="text-slate-800">{{ filteredDashRows.length }} รายการ</b> ที่กรองอยู่ตอนนี้<br/>ไฟล์มี 3 sheet: All / F7 / F10</p>
       <div class="flex gap-2">
         <button @click="doExport" class="flex-1 bg-slate-900 hover:bg-slate-700 text-white text-sm font-medium rounded-lg py-2.5">Download</button>
         <button @click="showExportModal=false" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium rounded-lg py-2.5">ยกเลิก</button>
@@ -663,15 +663,16 @@ createApp({
 
     // Export
     function doExport(){
-      var allRows=dashRows.value.map(function(r){
+      var srcRows=filteredDashRows.value;
+      var allRows=srcRows.map(function(r){
         var o={};
         o['PO']=r.po;o['PN']=r.pn;o['Switch Model']=r.swName;o['SN']=r.sn;
         o['สถานที่']=r.location;o['สถานะ']=r.statusLabel;o['วันที่']=r.date;
         o['ผู้รับ/เบิก/คืน']=r.person;o['หมายเหตุ']=r.remark;
         return o;
       });
-      var f7Rows=allRows.filter(function(_,i){return dashRows.value[i].location==='F7';});
-      var f10Rows=allRows.filter(function(_,i){return dashRows.value[i].location==='F10';});
+      var f7Rows=allRows.filter(function(_,i){return srcRows[i].location==='F7';});
+      var f10Rows=allRows.filter(function(_,i){return srcRows[i].location==='F10';});
       var wb=XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb,buildStyledSheet(allRows),'All');
       XLSX.utils.book_append_sheet(wb,buildStyledSheet(f7Rows),'F7');
@@ -938,7 +939,7 @@ createApp({
           handleScanResult(decodedText);
         }).catch(function(){
           scannerObj.clear();
-          scannerErr.value='อ่าน SN จากรูปไม่สำเร็จ ลองถ่ายให้เห็นบาร์โค้ดชัดๆ หรือกรอกเอง';
+          scannerErr.value='อ่าน SN จากรูปไม่สำเร็จ หรือกรอกเอง';
         });
       });
     }
